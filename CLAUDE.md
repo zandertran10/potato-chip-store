@@ -11,6 +11,7 @@ An online store that sells potato chips.
 - **Hosting:** Vercel (see `docs/design/decisions/0001-hosting-platform.md`)
 
 ## Where Things Live
+- Requirements: `docs/requirements/` (start with `requirements.md`)
 - Planning: `docs/story-mapping/`
 - Design: `docs/design/`
 - App code: `app/`

@@ -9,6 +9,9 @@ venv/
 .env.*
 .streamlit/secrets.toml
 
+# Demo order confirmation emails (written as files, never sent)
+outbox/
+
 # Supabase local
 supabase/.temp/
 supabase/.branches/
