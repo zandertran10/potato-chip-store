@@ -1,75 +1,81 @@
 # 🥔 Potato Chip Store
 
-An online store for selling potato chips.
+A demo online store where shoppers build their own bag of chips: pick a base chip, then add 1–3 flavors. It's built as a training project for learning to make a real-world app with Streamlit, Supabase and GitHub.
 
-> **Status:** Project setup only. No application code has been written yet. This repo currently holds the folder structure and planning documents.
+> **Status:** Planning complete. No application code yet; the foundation (F1–F15) is next.
+> **Demo only:** No real payments, no real emails, fictional data.
 
 ## Tech Stack
 
 | Layer | Technology | Purpose |
 |-------|-----------|---------|
-| Frontend / App | [Streamlit](https://streamlit.io) (Python) | Storefront UI, product pages, cart, checkout |
-| Backend | [Supabase](https://supabase.com) | Postgres database, authentication, storage for product images |
-| Hosting | [Vercel](https://vercel.com) | Deployment of the web app (see the hosting note below) |
+| App | [Streamlit](https://streamlit.io) (Python 3.11+) | Storefront, cart, checkout and admin screens |
+| Backend | [Supabase](https://supabase.com) | Postgres database, sign-in, product image storage |
+| Hosting | [Streamlit Community Cloud](https://streamlit.io/cloud) | Recommended; see [ADR 0001](docs/architecture/decisions/0001-hosting-platform.md) |
+| Collaboration | GitHub | Issues, pull requests, Actions (CI) |
+
+## Start Here
+
+1. [docs/requirements/00-consolidated-requirements.md](docs/requirements/00-consolidated-requirements.md): what we're building
+2. [docs/planning/work-division-plan.md](docs/planning/work-division-plan.md): who builds what, and how we use GitHub
 
 ## Repository Structure
 
 ```
 potato-chip-store/
 ├── README.md                  ← You are here
-├── CLAUDE.md                  ← Project context and rules for Claude (AI assistant)
+├── CLAUDE.md                  ← Project context and rules for Claude Code
+├── requirements.txt           ← Python packages
+├── skills-lock.json           ← Agent skills installed with `npx skills add`
+├── .env.example               ← Copy to .env (never commit .env)
 ├── .gitignore
 │
-├── .claude/                   ← Claude configuration
-│   ├── skills/                ← Reusable instruction sets for Claude
-│   │   ├── README.md
-│   │   └── _template/SKILL.md ← Copy this to create a new skill
-│   └── hooks/                 ← Docs for automated checks Claude runs
-│       └── README.md
+├── .streamlit/
+│   ├── config.toml            ← Theme and settings
+│   └── secrets.toml.example   ← Copy to secrets.toml (never commit it)
 │
-├── docs/                      ← All planning and design documentation
-│   ├── story-mapping/         ← Personas, user journey, story map, backlog
-│   │   ├── README.md
-│   │   ├── personas.md
-│   │   ├── story-map.md
-│   │   └── backlog.md
-│   └── design/                ← Architecture, data model, UI/UX
-│       ├── README.md
-│       ├── architecture.md
-│       ├── data-model.md
-│       ├── ui-ux.md
-│       ├── wireframes/        ← Sketches and mockup images
-│       └── decisions/         ← Architecture Decision Records (ADRs)
-│           ├── README.md
-│           └── 0001-hosting-platform.md
+├── .claude/
+│   ├── skills/                ← Agent skills (Streamlit, Supabase, UI/UX)
+│   └── hooks/                 ← Docs for automated checks
 │
-├── app/                       ← Streamlit application (empty for now)
-│   ├── pages/                 ← Streamlit multipage screens (Shop, Cart, Checkout…)
-│   ├── components/            ← Reusable UI pieces (product card, header…)
-│   ├── services/              ← Supabase data access (products, orders, auth)
-│   └── utils/                 ← Helpers (formatting, validation)
+├── app/                       ← Streamlit application
+│   ├── pages/                 ← One file per screen (S1–S16)
+│   ├── components/            ← Reusable UI pieces (product card, flavor tile…)
+│   ├── services/              ← All Supabase calls (catalog, cart, orders, admin, auth)
+│   ├── models/                ← Data classes (BaseChip, Flavor, Bag, Order…)
+│   ├── utils/                 ← Helpers (pricing, guards, session, outbox)
+│   └── config/                ← Loads settings and secrets
 │
-├── supabase/                  ← Database work (empty for now)
-│   ├── migrations/            ← SQL schema migrations
-│   └── seed/                  ← Sample data (sample chip flavors, etc.)
+├── assets/
+│   ├── images/                ← Logos and product images
+│   └── styles/                ← Custom CSS (keep it small)
 │
-├── assets/images/             ← Logos, product photos, brand assets
-└── tests/                     ← Automated tests (empty for now)
+├── docs/
+│   ├── requirements/          ← 00 summary, 01 stories, 02 UI/UX, 03 non-functional
+│   ├── planning/              ← Work division plan, personas, story map, backlog
+│   ├── architecture/          ← Architecture, data model, ADRs (decisions/)
+│   ├── deployment/            ← How to deploy (Streamlit Community Cloud)
+│   └── design/                ← Wireframes and mockups
+│
+├── supabase/
+│   ├── migrations/            ← SQL schema migrations (RLS on every table)
+│   └── seed/                  ← Demo data
+│
+├── tests/
+│   ├── unit/                  ← Fast tests, no database
+│   └── integration/           ← Tests against a local Supabase
+│
+└── scripts/                   ← Helper scripts (seed users, create issues…)
 ```
 
-Empty folders contain a `.gitkeep` file so Git keeps them in the repository.
-
-## Suggested Workflow
-
-1. **Plan:** fill in `docs/story-mapping/` (who buys chips, what they need to do).
-2. **Design:** fill in `docs/design/` (architecture, tables, screens), and record big choices in `docs/design/decisions/`.
-3. **Build:** write code in `app/` and `supabase/` only after the plan and design are agreed.
-4. **Test and deploy.**
-
-## Hosting Note
-
-Streamlit runs as a long-lived server using websockets, and Vercel is built mainly for static sites and short-lived serverless functions, so Streamlit does not run well on Vercel out of the box. This is tracked as an open decision in [`docs/design/decisions/0001-hosting-platform.md`](docs/design/decisions/0001-hosting-platform.md).
+Empty folders contain a `.gitkeep` file so Git keeps them.
 
 ## Getting Started
 
-Setup instructions will be added once the first code is written.
+Full setup steps are added in foundation item F15. In short:
+
+1. Install Python 3.11+, Git, Node.js, the GitHub CLI, Docker and the Supabase CLI.
+2. Clone the repo, then create a virtual environment: `python -m venv .venv`.
+3. Install the packages: `pip install -r requirements.txt`.
+4. Copy `.env.example` to `.env` and `.streamlit/secrets.toml.example` to `.streamlit/secrets.toml`, then fill in your Supabase values.
+5. Run the app: `streamlit run app/main.py`.

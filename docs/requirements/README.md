@@ -1,19 +1,22 @@
 # Requirements
 
-Start with the consolidated document. The detailed documents expand each area.
+Read them in this order. Start with doc 00.
 
-| File | Contents | Main reader |
-|------|----------|-------------|
-| `requirements.md` | Consolidated requirements: product, scope, roles, feature summary, assumptions | Everyone |
-| `product-features-stories.md` | Each feature broken into user stories with acceptance criteria | Developers, testers |
-| `ui-ux-requirements.md` | UI vision analysis and design requirements for wireframes and mockups | Designer |
-| `non-functional-requirements.md` | Sign-in, security, data, performance, accessibility, and other quality rules | Developers |
+| Doc | Contents | Main reader |
+|-----|----------|-------------|
+| [00-consolidated-requirements.md](00-consolidated-requirements.md) | One-page summary: goals, roles, features, data model, open questions, build order, traceability | Everyone |
+| [01-product-features-user-stories.md](01-product-features-user-stories.md) | Epics E1–E7, user stories (US-101…) with acceptance criteria (AC1…), domain terms, seed data, out of scope | Developers, testers |
+| [02-ui-ux-requirements.md](02-ui-ux-requirements.md) | Vision, design principles, visual direction, flows, screens S1–S16, Streamlit limits, designer deliverables | Designer, developers |
+| [03-non-functional-requirements.md](03-non-functional-requirements.md) | Authentication, security, privacy and child safety, data integrity, performance, deployment, limits | Developers |
 
-Requirement IDs used across these files:
+## ID prefixes
 
 | Prefix | Meaning | Example |
 |--------|---------|---------|
-| `F-` | Feature | F-01 Add to cart |
-| `US-` | User story | US-01.2 |
-| `UX-` | UI/UX requirement | UX-PG-03 |
-| `NFR-` | Non-functional requirement | NFR-SEC-04 |
+| `E` | Epic (feature area) | E3 Add to cart |
+| `US-` | User story | US-301 Build a bag |
+| `AC` | Acceptance criterion within a story | US-301 AC2 |
+| `S` | Screen | S3 Product detail |
+| `BR-` | Business rule | BR-01 |
+| `NFR-` | Non-functional requirement | NFR-SEC-02 |
+| `Q` | Open question | Q4 Hosting |

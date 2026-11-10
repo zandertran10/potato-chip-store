@@ -7,6 +7,7 @@ venv/
 # Secrets
 .env
 .env.*
+!.env.example
 .streamlit/secrets.toml
 
 # Demo order confirmation emails (written as files, never sent)
