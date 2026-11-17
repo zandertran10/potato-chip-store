@@ -78,4 +78,4 @@ Full setup steps are added in foundation item F15. In short:
 2. Clone the repo, then create a virtual environment: `python -m venv .venv`.
 3. Install the packages: `pip install -r requirements.txt`.
 4. Copy `.env.example` to `.env` and `.streamlit/secrets.toml.example` to `.streamlit/secrets.toml`, then fill in your Supabase values.
-5. Run the app: `streamlit run app/main.py`.
+5. Run the app: `streamlit run app/streamlit_app.py`.

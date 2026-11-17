@@ -58,7 +58,7 @@ Result: `git log --oneline main` reads like a list of finished stories, and any 
 
 | Owner | Files (after the foundation) |
 |-------|-----------------------------|
-| **Lead** | `supabase/**`, `app/services/**`, `app/models/**`, `app/config/**`, `app/utils/**`, `app/main.py`, `.github/**`, `requirements*.txt`, `pages/checkout.py`, `pages/confirmation.py`, `pages/my_account.py`, `components/order_history.py`, `pages/admin_orders.py` |
+| **Lead** | `supabase/**`, `app/services/**`, `app/models/**`, `app/config/**`, `app/utils/**`, `app/streamlit_app.py`, `.github/**`, `requirements*.txt`, `pages/checkout.py`, `pages/confirmation.py`, `pages/my_account.py`, `components/order_history.py`, `pages/admin_orders.py` |
 | **User 1** | `pages/home.py`, `pages/shop.py`, `pages/admin_settings.py`, `pages/admin_dashboard.py`, `components/product_card.py`, `components/search_filters.py`, `.streamlit/config.toml`, `assets/styles/**`, `docs/design/**` |
 | **User 2** | `pages/product.py`, `pages/cart.py`, `components/bag_builder.py`, `components/flavor_tile.py`, `components/price_summary.py`, `components/qty_stepper.py`, `components/staff_picks.py`, `components/flavor_passport.py` |
 | **User 3** | `pages/sign_in.py`, `pages/register.py`, `pages/reset_password.py`, `components/header.py`, `components/profile_form.py`, `pages/admin_chips.py`, `pages/admin_flavors.py`, `pages/admin_stock.py`, `pages/admin_staff.py` |
@@ -217,7 +217,7 @@ The Lead delivers the foundation as **15 small items, F1 to F15**. Each one is a
 ### F14 App shell, theme, shared components and helpers · M
 - **Branch:** `feat/F14-app-shell`
 - **Build:**
-  - `app/main.py` with `st.navigation` listing **every screen S1–S16**. Admin pages only show up for staff and owner.
+  - `app/streamlit_app.py` with `st.navigation` listing **every screen S1–S16**. Admin pages only show up for staff and owner.
   - **One placeholder file per screen** in `app/pages/`, each protected by the right guard and showing its title and "Coming soon". Product, checkout and order pages read their ID from the link (`?id=`).
   - Simple first versions of the components in section 3, including stub functions for the three My account tabs and `staff_picks_row()`
   - `app/utils/pricing.py` (`bag_price`, `check_flavor_limit`, with unit tests) and `app/utils/outbox.py` (a basic `.eml` writer)
@@ -228,7 +228,7 @@ The Lead delivers the foundation as **15 small items, F1 to F15**. Each one is a
 ### F15 Developer docs, staging deploy, tag v0.1.0 · S
 - **Branch:** `docs/F15-readme-deploy`
 - **Build:**
-  - `README.md` "Getting started": install Python 3.11+, Git, the Supabase CLI and Docker; clone; create a virtual environment; `pip install -r requirements.txt -r requirements-dev.txt`; copy the `.example` files; `supabase start`; `supabase db reset`; seed; `streamlit run app/main.py`; `pytest`
+  - `README.md` "Getting started": install Python 3.11+, Git, the Supabase CLI and Docker; clone; create a virtual environment; `pip install -r requirements.txt -r requirements-dev.txt`; copy the `.example` files; `supabase start`; `supabase db reset`; seed; `streamlit run app/streamlit_app.py`; `pytest`
   - `docs/deployment/README.md`: how to deploy to Streamlit Community Cloud from `main`, with keys in the app's Secrets settings
   - Deploy staging. Remove the admin bypass on `main`.
 - **Done when:** User 1 follows the README on a clean computer and the app runs
@@ -442,7 +442,7 @@ git pull
 git checkout -b feat/U2-03-build-a-bag
 
 # 3. Build and test. Commit on the branch as often as you like.
-streamlit run app/main.py
+streamlit run app/streamlit_app.py
 ruff check .
 pytest
 git add app/components/bag_builder.py tests/unit/test_bag_builder.py
