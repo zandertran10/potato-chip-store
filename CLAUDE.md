@@ -1,33 +1,34 @@
-# CLAUDE.md: Project Context for Claude
+# Potato Chip Co.: rules for Claude Code
 
-This file gives Claude (AI coding assistant) the context it needs when working in this repo.
+Potato Chip Co.: a demo shop for home-made organic potato chips, where shoppers build their own bag (one base chip plus 1 to 3 flavors). Built for a high school class. Streamlit + Supabase. No real payments or emails.
 
-## Project
-A demo online store that sells potato chips. Shoppers build their own bag: one base chip plus 1–3 flavor add-ons. It's built for training: no real payments, no real emails, fictional data, age-appropriate content.
+## Read first
+- Stories and plan: `docs/planning/work-division-plan.md`, `docs/requirements/01-product-features-user-stories.md`
+- Look and feel: `docs/requirements/02-ui-ux-requirements.md` (section 3 color tokens win)
+- Security and quality: `docs/requirements/03-non-functional-requirements.md`
 
-## Tech Stack
-- **App:** Streamlit (Python 3.11+, Streamlit 1.57+)
-- **Backend:** Supabase (Postgres, Auth, Storage)
-- **Hosting:** Streamlit Community Cloud (recommended; see `docs/architecture/decisions/0001-hosting-platform.md`)
-- **Collaboration:** GitHub (issues, PRs, Actions)
+## Layers (explain these to the student when asked)
+page (`app/pages`) -> service (`app/services`) -> Supabase table + security rule (`supabase/migrations`)
+Pages never call Supabase directly. Reusable UI is in `app/components`. Business rules live in services or database functions.
 
-## Where Things Live
-- Requirements: `docs/requirements/` (start with `00-consolidated-requirements.md`; the data model is in section 6)
-- Work plan: `docs/planning/work-division-plan.md` (pick codes, file ownership, GitHub workflow)
-- Architecture and ADRs: `docs/architecture/`
-- Deployment: `docs/deployment/`
-- UI design and wireframes: `docs/design/`
-- App code: `app/` (`pages`, `components`, `services`, `models`, `utils`, `config`)
-- Database: `supabase/` (`migrations`, `seed`)
-- Tests: `tests/unit/`, `tests/integration/`
-- Scripts: `scripts/`
-- Claude skills: `.claude/skills/` · Claude hooks: `.claude/hooks/`
-
-## Rules for Claude
-- Read the relevant docs in `docs/` before writing code.
-- Never commit secrets. Supabase keys go in `.env` or `.streamlit/secrets.toml` (both gitignored), never in code.
-- Enable Row Level Security (RLS) on every Supabase table.
-- Pages never call Supabase directly; use `app/services/`.
-- One story = one branch = one PR = one squash commit (see the work plan, section 2).
-- Keep changes small and explain them.
+## Rules
+- Build only the story you are asked for. Touch only its files. Ask before changing `app/streamlit_app.py`, `requirements.txt`, service or component signatures, or any merged migration (add a NEW migration file instead).
+- Never read, print or commit `.env`, `.streamlit/secrets.toml` or any key. The service role key is never used in the app.
+- Add files to git by name, never `git add -A`. Never push to `main`. Never merge a PR.
+- Keep code beginner-friendly: clear names, short functions, a comment for each non-obvious "why", type hints on service functions.
+- If a test fails, say whether the test or the code is wrong before changing anything. Never delete a test to get green.
+- Ethical gamification: no fake timers, fake scarcity, random rewards, leaderboards or penalties.
 - Record any major technical choice as a new ADR in `docs/architecture/decisions/`.
+
+## Commands (venv active)
+- Run: `streamlit run app/streamlit_app.py`
+- Lint: `ruff check .`
+- Tests: `python -m pytest tests/unit -q`
+
+## Skills
+- Streamlit pages and components: `developing-with-streamlit`
+- SQL, migrations, security rules: `supabase-postgres-best-practices`
+- Layout, color, accessibility: `ui-ux-pro-max`
+
+## When reviewing (a separate, read-only session)
+Report only. Do not edit files. Check scope, acceptance criteria, secrets, role checks and tests. End with VERDICT, BLOCKERS, SHOULD FIX, NOT CHECKED.
