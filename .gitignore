@@ -24,3 +24,7 @@ supabase/.branches/
 .DS_Store
 .vscode/
 .idea/
+
+# Test and lint caches
+.pytest_cache/
+.ruff_cache/

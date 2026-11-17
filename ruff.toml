@@ -1,0 +1,13 @@
+# Ruff settings for this repo. Used by `ruff check .` on laptops and in CI.
+
+# Match the Python version in CI (.github/workflows/ci.yml).
+target-version = "py311"
+
+# Skip the installed Claude skills: they are third-party code that we do not
+# edit, so their style is not ours to fix.
+extend-exclude = [".claude"]
+
+[lint]
+# Ruff's default rules (real errors and unused imports) plus import sorting.
+# Kept small on purpose so beginners are not buried in style warnings.
+select = ["E4", "E7", "E9", "F", "I"]
