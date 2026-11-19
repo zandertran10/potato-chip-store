@@ -142,7 +142,7 @@ This project may be used in trainings that include minors.
 | ID | Requirement | Priority |
 |----|-------------|----------|
 | NFR-DEP-01 | There are three environments: **Local** (local Supabase with Docker, or a personal free project), **Staging** (a shared Supabase project; the app is deployed from `main`), and **Production** (a separate Supabase project; deployed from release tags). | Should |
-| NFR-DEP-02 | The app is hosted on **Streamlit Community Cloud** (recommended in ADR 0001). The entry point is `app/main.py`. | Should |
+| NFR-DEP-02 | The app is hosted on **Streamlit Community Cloud** (recommended in ADR 0001). The entry point is `app/streamlit_app.py`. | Should |
 | NFR-DEP-03 | Settings come only from environment variables or secrets, so the same code runs in every environment without changes. | Must |
 | NFR-DEP-04 | Releases are tagged with versions (`v1.0.0`) and published as GitHub Releases. | Must |
 | NFR-DEP-05 | Migrations are applied to staging before production. | Must |

@@ -20,7 +20,7 @@ Streamlit runs as a long-lived Python server that talks to the browser over webs
 Why: it's built for Streamlit, free, deploys straight from GitHub, keeps keys in its Secrets settings, and is the target used by the training playbook.
 
 ## Consequences
-- The app's entry point is `app/main.py`. Staging deploys from `main`, and production deploys from release tags (see `docs/deployment/`).
+- The app's entry point is `app/streamlit_app.py`. Staging deploys from `main`, and production deploys from release tags (see `docs/deployment/`).
 - Files written on the server, such as the `outbox/` folder, are temporary and cleared when the app restarts. That's acceptable for a demo.
 - Free-tier limits apply: the app sleeps when it isn't being used, and resources are limited.
 - Vercel is no longer the hosting plan. It could still be used later for a separate marketing site (option 4).
