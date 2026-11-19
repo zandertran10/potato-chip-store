@@ -1,0 +1,6 @@
+# Ruff settings for this repo, used by `ruff check .` on laptops and in CI.
+
+# Skip the installed Claude skills in .claude/: they are third-party files we
+# don't edit (reinstalling them would undo any fixes). Every rule still applies
+# to our own code in app/, tests/ and scripts/.
+extend-exclude = [".claude"]
