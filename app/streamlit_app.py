@@ -4,12 +4,14 @@ This file only builds the menu, the header and the footer. Every screen lives in
 app/pages/, so stories never need to edit this file (fast-track playbook, Prompt E).
 
 Menu rules (doc 02 section 5):
-- Every screen is registered for everyone, so every link works.
-- Admin pages are HIDDEN from the menu for guests and customers. If someone
-  opens one by its link anyway, the page's own auth.require_role() check shows
-  "This page is for store staff." Hiding a link is not security; that check is.
-- Product, confirmation and reset-password are always hidden: you reach them
-  from links (product cards, checkout, the sign-in page).
+- Guests and customers only get the shopping and account pages. Admin pages
+  are NOT REGISTERED for them at all, so nothing about the store's internal
+  pages is visible: not in the menu, and an admin address just opens Home.
+- Staff also get the 4 staff pages; the owner also gets the 3 owner pages.
+- Every admin page still checks the role itself (auth.require_role), and the
+  database's RLS rules check again. Hiding pages is not the security; those are.
+- Product, checkout, confirmation and reset-password never show in the menu:
+  you reach them from links (product cards, the cart, the sign-in page).
 """
 
 import sys
@@ -57,6 +59,7 @@ menu = {
         _page(pages.HOME, "Home", ":material/home:", "Start here: build your own bag of chips.", default=True),
         _page(pages.SHOP, "Shop", ":material/storefront:", "Every chip and flavor, with search and filters."),
         _page(pages.CART, "Cart", ":material/shopping_cart:", "The bags you've built, ready to check out."),
+        # Reached from the cart's Checkout button, not the menu.
         _page(pages.PRODUCT, "Build your bag", ":material/bakery_dining:", "Pick a chip and its flavors.", show=False),
         _page(pages.CHECKOUT, "Checkout", ":material/shopping_bag:", "Delivery details and place your order.", show=False),
         _page(pages.CONFIRMATION, "Order confirmed", ":material/receipt_long:", "Your order number and items.", show=False),
@@ -67,16 +70,25 @@ menu = {
         _page(pages.RESET_PASSWORD, "Reset password", ":material/lock_reset:", "Get a password reset email.", show=False),
         _page(pages.MY_ACCOUNT, "My account", ":material/account_circle:", "Your orders, profile and flavor passport.", show=signed_in),
     ],
-    "Store Admin": [
-        _page(pages.ADMIN_CHIPS, "Base chips", ":material/bakery_dining:", "Add, edit and hide base chips.", show=is_staff),
-        _page(pages.ADMIN_FLAVORS, "Flavors", ":material/category:", "Add, edit and hide flavors; set staff picks.", show=is_staff),
-        _page(pages.ADMIN_STOCK, "Stock", ":material/warehouse:", "Stock levels, restocking and history.", show=is_staff),
-        _page(pages.ADMIN_ORDERS, "Orders", ":material/local_shipping:", "Pack, ship or cancel orders.", show=is_staff),
-        _page(pages.ADMIN_STAFF, "Staff", ":material/group:", "Give or remove the staff role.", show=is_owner),
-        _page(pages.ADMIN_SETTINGS, "Settings", ":material/settings:", "Max flavors, low-stock level, featured chips.", show=is_owner),
-        _page(pages.ADMIN_DASHBOARD, "Dashboard", ":material/dashboard:", "Orders, bags sold and top flavors.", show=is_owner),
-    ],
 }
+
+# Store Admin exists only for staff and the owner (see the rules at the top).
+admin_pages = []
+if is_staff:
+    admin_pages += [
+        _page(pages.ADMIN_CHIPS, "Base chips", ":material/bakery_dining:", "Add, edit and hide base chips."),
+        _page(pages.ADMIN_FLAVORS, "Flavors", ":material/category:", "Add, edit and hide flavors; set staff picks."),
+        _page(pages.ADMIN_STOCK, "Stock", ":material/warehouse:", "Stock levels, restocking and history."),
+        _page(pages.ADMIN_ORDERS, "Orders", ":material/local_shipping:", "Pack, ship or cancel orders."),
+    ]
+if is_owner:
+    admin_pages += [
+        _page(pages.ADMIN_STAFF, "Staff", ":material/group:", "Give or remove the staff role."),
+        _page(pages.ADMIN_SETTINGS, "Settings", ":material/settings:", "Max flavors, low-stock level, featured chips."),
+        _page(pages.ADMIN_DASHBOARD, "Dashboard", ":material/dashboard:", "Orders, bags sold and top flavors."),
+    ]
+if admin_pages:
+    menu["Store Admin"] = admin_pages
 
 current_page = st.navigation(menu, position="top")
 render_header(user)
