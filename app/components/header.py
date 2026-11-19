@@ -14,10 +14,11 @@ from app.utils import pages
 
 
 def _cart_label() -> str:
-    """'Cart (3)', or just 'Cart' until the cart service is built (US-302)."""
+    """'Cart (3)', or just 'Cart' if the count can't be loaded right now."""
     try:
         count = cart.count_bags()
-    except NotImplementedError:
+    except cart.CartError:
+        # The header must never break a page; the cart page explains the problem.
         return "Cart"
     return f"Cart ({count})"
 
