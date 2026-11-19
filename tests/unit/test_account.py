@@ -82,3 +82,22 @@ def test_reset_password_never_complains(fake_supabase):
 )
 def test_next_page_only_accepts_our_own_pages(next_value, expected):
     assert pages.page_for(next_value) == expected
+
+
+# The menu reads the role fresh (a role change shows up without signing in again) ----
+
+def test_refresh_current_user_picks_up_a_new_role(as_customer, fake_supabase):
+    next(r for r in fake_supabase.rows("profiles") if r["email"] == "customer@demo.test")["role"] = "staff"
+
+    assert auth.refresh_current_user().role == "staff"
+    assert auth.current_user().role == "staff"
+
+
+def test_refresh_current_user_keeps_the_saved_user_when_offline(as_owner, fake_supabase):
+    fake_supabase.offline = True
+
+    assert auth.refresh_current_user().role == "owner"
+
+
+def test_refresh_current_user_for_a_guest_is_none(fake_supabase):
+    assert auth.refresh_current_user() is None

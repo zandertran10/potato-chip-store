@@ -33,7 +33,8 @@ from app.utils import pages
 st.set_page_config(page_title="Potato Chip Co.", page_icon=":material/bakery_dining:", layout="wide")
 
 # Who's here decides what the MENU shows. Each page still checks for itself.
-user = auth.current_user()
+# The role is read fresh, so a role change shows up in the menu right away.
+user = auth.refresh_current_user()
 role = user.role if user else None
 signed_in = user is not None
 is_staff = role in ("staff", "owner")

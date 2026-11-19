@@ -187,6 +187,24 @@ def current_user() -> CurrentUser | None:
     return st.session_state.get(_USER_KEY)
 
 
+def refresh_current_user() -> CurrentUser | None:
+    """The signed-in user with their name and role read fresh from the database.
+
+    Used by the menu, so a role given or taken away by the owner shows up on
+    the next click, not only after signing in again. If the database can't be
+    reached, the saved user is kept (pages still check for themselves).
+    """
+    user = current_user()
+    if user is None:
+        return None
+    try:
+        fresh = _load_profile(user.id, user.email)
+    except (APIError, httpx.HTTPError):
+        return user
+    st.session_state[_USER_KEY] = fresh
+    return fresh
+
+
 def _sign_in_link() -> None:
     """A Sign in link that brings the visitor back to this page afterwards (US-502 AC3)."""
     here = pages.current_url_path()
