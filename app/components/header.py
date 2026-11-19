@@ -54,7 +54,10 @@ def render_header(user: CurrentUser | None) -> None:
         st.page_link(pages.CART, label=_cart_label(), icon=":material/shopping_cart:")
 
         if user is None:
-            st.page_link(pages.SIGN_IN, label="Sign in", icon=":material/login:")
+            # Come back to this page after signing in (US-502 AC3).
+            here = pages.current_url_path()
+            st.page_link(pages.SIGN_IN, label="Sign in", icon=":material/login:",
+                         query_params={"next": here} if pages.page_for(here) else None)
         else:
             st.page_link(pages.MY_ACCOUNT, label=user.display_name, icon=":material/account_circle:")
             if st.button("Sign out", icon=":material/logout:", key="header_sign_out"):

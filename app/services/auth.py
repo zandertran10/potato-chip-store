@@ -18,6 +18,7 @@ from postgrest.exceptions import APIError
 from supabase_auth.errors import AuthApiError, AuthError
 
 from app.services.supabase_client import forget_client, get_client
+from app.utils import pages
 from app.utils.session import on_sign_in
 
 logger = logging.getLogger(__name__)
@@ -43,19 +44,22 @@ class CurrentUser:
     role: str  # "customer", "staff" or "owner"
 
 
+PASSWORD_RULES = ("At least 8 characters", "At least one letter", "At least one number")
+
+
 def password_problems(password: str) -> list[str]:
     """Return the password rules that `password` breaks (NFR-AUTH-02).
 
-    An empty list means the password is fine. The register page shows these
-    as a checklist that ticks off while the user types.
+    An empty list means the password is fine. The register page shows
+    PASSWORD_RULES as a checklist that ticks off while the user types.
     """
     problems = []
     if len(password) < 8:
-        problems.append("At least 8 characters")
+        problems.append(PASSWORD_RULES[0])
     if not re.search(r"[A-Za-z]", password):
-        problems.append("At least one letter")
+        problems.append(PASSWORD_RULES[1])
     if not re.search(r"[0-9]", password):
-        problems.append("At least one number")
+        problems.append(PASSWORD_RULES[2])
     return problems
 
 
@@ -153,7 +157,16 @@ def reset_password(email: str) -> None:
     The page shows the same message whether or not the email exists, so nobody
     can use it to find out who has an account. Story: US-503 (U3-07).
     """
-    raise NotImplementedError("US-503: reset_password")
+    email = email.strip().lower()
+    if "@" not in email:
+        return  # nothing to send; the page still shows the same message
+    try:
+        get_client().auth.reset_password_for_email(email)
+    except (AuthError, httpx.HTTPError) as error:
+        # Never tell the visitor; that would reveal whether the email exists.
+        logger.warning("Password reset request failed: %s", type(error).__name__)
+        return
+    logger.info("Password reset requested")  # no email in the log (NFR-LOG-03)
 
 
 def sign_out() -> None:
@@ -174,6 +187,13 @@ def current_user() -> CurrentUser | None:
     return st.session_state.get(_USER_KEY)
 
 
+def _sign_in_link() -> None:
+    """A Sign in link that brings the visitor back to this page afterwards (US-502 AC3)."""
+    here = pages.current_url_path()
+    params = {"next": here} if pages.page_for(here) else None
+    st.page_link(pages.SIGN_IN, label="Sign in", icon=":material/login:", query_params=params)
+
+
 def require_role(*allowed_roles: str) -> CurrentUser:
     """Stop the page unless the right person is signed in. Use at the top of a page.
 
@@ -191,14 +211,17 @@ def require_role(*allowed_roles: str) -> CurrentUser:
     user = current_user()
     if user is None:
         st.info("Please sign in to see this page.", icon=":material/login:")
+        _sign_in_link()
         st.stop()
 
     try:
         user = _load_profile(user.id, user.email)
     except APIError:
-        # Usually an expired session: ask the person to sign in again.
+        # Usually an expired session: ask the person to sign in again. Only the
+        # sign-in is dropped, so a guest cart in the session is kept (NFR-AUTH-05).
         st.session_state.pop(_USER_KEY, None)
         st.info("Your session has ended. Please sign in again.", icon=":material/login:")
+        _sign_in_link()
         st.stop()
     except httpx.HTTPError as error:
         # Supabase unreachable: a friendly message instead of a crash (NFR-REL-01).
