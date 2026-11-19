@@ -250,5 +250,8 @@ def require_role(*allowed_roles: str) -> CurrentUser:
 
     if allowed_roles and user.role not in allowed_roles:
         st.error("This page is for store staff.", icon=":material/block:")
+        # Saying which role the database gave helps spot a role that wasn't set.
+        needed = "the store owner" if allowed_roles == ("owner",) else "staff or the owner"
+        st.caption(f"You're signed in as {user.email}, whose role is **{user.role}**. This page needs {needed}.")
         st.stop()
     return user
