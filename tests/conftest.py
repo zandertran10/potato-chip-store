@@ -26,6 +26,7 @@ if str(REPO_ROOT) not in sys.path:
     sys.path.insert(0, str(REPO_ROOT))
 
 # These imports must stay BELOW the path fix above, or `app` can't be found.
+import httpx
 import streamlit as st
 from supabase_auth.errors import AuthApiError
 
@@ -46,6 +47,37 @@ SAMPLE_PROFILES = {
     "00000000-0000-4000-8000-0000000000a3": {
         "email": "customer@demo.test", "display_name": "Casey Customer", "role": "customer"},
 }
+
+
+def _chip_row(chip_id, name, style, thickness, crunch, price, stock, **extra) -> dict:
+    """A base_chips row as Supabase returns it (money comes back as a number)."""
+    row = {
+        "id": chip_id, "name": name, "description": f"{name}: made by hand from organic potatoes.",
+        "style": style, "thickness": thickness, "crunch_level": crunch, "allergens": [],
+        "price": price, "stock": stock, "image_path": None, "image_alt": None,
+        "is_featured": False, "is_active": True,
+    }
+    row.update(extra)
+    return row
+
+
+# Rows as the database stores them, from supabase/seed/01_catalog.sql, plus one
+# hidden chip so tests can check that hidden items stay hidden.
+SAMPLE_BASE_CHIP_ROWS = {
+    row["id"]: row
+    for row in (
+        _chip_row("00000000-0000-4000-8000-000000000101", "Classic Thin", "Classic", "Thin", 2, 2.5, 100,
+                  is_featured=True),
+        _chip_row("00000000-0000-4000-8000-000000000102", "Kettle Cooked", "Kettle", "Thick", 3, 3.0, 80,
+                  is_featured=True, image_path="chips/kettle.webp", image_alt="A bowl of thick kettle chips"),
+        _chip_row("00000000-0000-4000-8000-000000000103", "Wavy Ridge", "Wavy", "Regular", 2, 2.75, 60,
+                  is_featured=True),
+        _chip_row("00000000-0000-4000-8000-000000000104", "Sweet Potato", "Sweet potato", "Regular", 1, 3.25, 3),
+        _chip_row("00000000-0000-4000-8000-000000000105", "Retired Ripple", "Wavy", "Thick", 2, 2.95, 0,
+                  is_active=False),
+    )
+}
+HIDDEN_CHIP_ID = "00000000-0000-4000-8000-000000000105"
 
 
 @pytest.fixture
@@ -81,27 +113,51 @@ def sample_flavors() -> list[Flavor]:
 # --- The fake Supabase client --------------------------------------------------
 
 class _FakeQuery:
-    """Answers table("profiles").select(...).eq("id", x).maybe_single().execute()."""
+    """Answers table(name).select(...).eq(col, value)....[.maybe_single()].execute().
+
+    Every .eq() filter must match. With .maybe_single() it returns one row, or
+    None when nothing matches, just like the real client.
+    """
 
     def __init__(self, rows: dict[str, dict]):
         self._rows = rows
-        self._id: str | None = None
+        self._filters: list[tuple[str, object]] = []
+        self._single = False
 
     def select(self, *_columns):
         return self
 
-    def eq(self, column: str, value: str):
-        if column == "id":
-            self._id = value
+    def eq(self, column: str, value):
+        self._filters.append((column, value))
         return self
 
     def maybe_single(self):
+        self._single = True
         return self
 
     def execute(self):
-        row = self._rows.get(self._id)
+        matches = [
+            {"id": row_id, **row}
+            for row_id, row in self._rows.items()
+            if all({"id": row_id, **row}.get(column) == value for column, value in self._filters)
+        ]
+        if not self._single:
+            return SimpleNamespace(data=matches)
         # Like the real client: None when there's no row.
-        return SimpleNamespace(data=dict(row)) if row else None
+        return SimpleNamespace(data=matches[0]) if matches else None
+
+
+class _FakeBucket:
+    def __init__(self, name: str):
+        self._name = name
+
+    def get_public_url(self, path: str) -> str:
+        return f"https://fake.supabase.test/storage/v1/object/public/{self._name}/{path}"
+
+
+class _FakeStorage:
+    def from_(self, bucket: str) -> _FakeBucket:
+        return _FakeBucket(bucket)
 
 
 class _FakeAuth:
@@ -135,19 +191,26 @@ class FakeSupabase:
 
     def __init__(self):
         self.profiles = {key: dict(value) for key, value in SAMPLE_PROFILES.items()}
+        self.base_chips = {key: dict(value) for key, value in SAMPLE_BASE_CHIP_ROWS.items()}
         self.passwords = {row["email"]: FAKE_PASSWORD for row in self.profiles.values()}
         self.signed_out = False
+        # Set to True to pretend Supabase can't be reached (network error).
+        self.offline = False
         # The password every sample account has in this fake.
         self.test_password = FAKE_PASSWORD
         self.auth = _FakeAuth(self)
+        self.storage = _FakeStorage()
 
     def user_id(self, email: str) -> str:
         return next(uid for uid, row in self.profiles.items() if row["email"] == email)
 
     def table(self, name: str) -> _FakeQuery:
-        if name != "profiles":
+        if self.offline:
+            raise httpx.ConnectError("Supabase is unreachable (fake)")
+        tables = {"profiles": self.profiles, "base_chips": self.base_chips}
+        if name not in tables:
             raise NotImplementedError(f"The fake client has no '{name}' table yet; add it here.")
-        return _FakeQuery(self.profiles)
+        return _FakeQuery(tables[name])
 
 
 # --- Fixtures ------------------------------------------------------------------
@@ -168,4 +231,5 @@ def fake_supabase(monkeypatch) -> FakeSupabase:
     fake = FakeSupabase()
     monkeypatch.setattr("app.services.supabase_client.get_client", lambda: fake)
     monkeypatch.setattr("app.services.auth.get_client", lambda: fake)
+    monkeypatch.setattr("app.services.catalog.get_client", lambda: fake)
     return fake

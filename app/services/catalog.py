@@ -8,6 +8,14 @@ st.cache_data, and the cache cleared after an admin edit (NFR-PERF-03).
 
 from __future__ import annotations
 
+import logging
+import uuid
+from decimal import Decimal
+from typing import Any
+
+import httpx
+from postgrest.exceptions import APIError
+
 from app.models.catalog import (
     BaseChip,
     Flavor,
@@ -16,6 +24,65 @@ from app.models.catalog import (
     StaffPick,
     StoreSettings,
 )
+from app.services.supabase_client import get_client
+
+logger = logging.getLogger(__name__)
+
+IMAGE_BUCKET = "product-images"
+_BASE_CHIP_COLUMNS = (
+    "id, name, description, style, thickness, crunch_level, allergens, price, stock, "
+    "image_path, image_alt, is_featured, is_active"
+)
+
+
+class CatalogUnavailable(Exception):
+    """The catalog couldn't be loaded (Supabase down or unreachable).
+
+    Pages catch this and show states.offline() (NFR-REL-01, NFR-REL-02).
+    """
+
+
+def _is_uuid(value: str) -> bool:
+    """True if `value` looks like a database id. Anything else can't be a chip."""
+    try:
+        uuid.UUID(value)
+    except (ValueError, AttributeError, TypeError):
+        return False
+    return True
+
+
+def image_url(image_path: str | None) -> str | None:
+    """Public URL for a chip or flavor image, or None if it has no image.
+
+    Models keep the storage path (what admin pages save); pages and components
+    call this when they need something st.image can load. The bucket is public.
+    """
+    if not image_path:
+        return None
+    if image_path.startswith(("http://", "https://")):
+        return image_path
+    return get_client().storage.from_(IMAGE_BUCKET).get_public_url(image_path)
+
+
+def _base_chip_from_row(row: dict[str, Any]) -> BaseChip:
+    """Turn one `base_chips` row into a BaseChip. Reused by the other catalog stories."""
+    return BaseChip(
+        id=row["id"],
+        name=row["name"],
+        description=row.get("description") or "",
+        style=row["style"],
+        thickness=row["thickness"],
+        crunch_level=int(row["crunch_level"]),
+        # str() first: the database sends money as a number, and Decimal(2.5)
+        # from a float can pick up tiny rounding errors. Decimal("2.5") can't.
+        price=Decimal(str(row["price"])),
+        stock=int(row["stock"]),
+        allergens=tuple(row.get("allergens") or ()),
+        image_path=row.get("image_path"),
+        image_alt=row.get("image_alt"),
+        is_featured=bool(row.get("is_featured")),
+        is_active=bool(row.get("is_active", True)),
+    )
 
 
 def list_base_chips(*, include_inactive: bool = False) -> list[BaseChip]:
@@ -29,9 +96,31 @@ def list_base_chips(*, include_inactive: bool = False) -> list[BaseChip]:
 def get_base_chip(chip_id: str) -> BaseChip | None:
     """One active base chip, or None if the id is wrong or the chip is hidden.
 
-    Story: US-201 (U2-01).
+    Raises CatalogUnavailable if Supabase can't be reached. Story: US-201 (U2-01).
     """
-    raise NotImplementedError("US-201: get_base_chip")
+    # A link like ?id=abc can't match any chip. Checking here also avoids a
+    # database error, because the id column only accepts real ids (uuid).
+    if not _is_uuid(chip_id):
+        return None
+
+    try:
+        response = (
+            get_client()
+            .table("base_chips")
+            .select(_BASE_CHIP_COLUMNS)
+            .eq("id", chip_id)
+            # Hidden chips count as "not found", even for staff (US-201 AC4).
+            # For shoppers the database's RLS rule hides them anyway.
+            .eq("is_active", True)
+            .maybe_single()
+            .execute()
+        )
+    except (APIError, httpx.HTTPError) as error:
+        logger.error("Could not load base chip: %s", type(error).__name__)
+        raise CatalogUnavailable from None
+
+    row = response.data if response else None
+    return _base_chip_from_row(row) if row else None
 
 
 def list_flavors(*, include_inactive: bool = False) -> list[Flavor]:
