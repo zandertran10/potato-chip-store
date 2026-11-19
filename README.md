@@ -2,7 +2,7 @@
 
 A demo online store where shoppers build their own bag of chips: pick a base chip, then add 1–3 flavors. It's built as a training project for learning to make a real-world app with Streamlit, Supabase and GitHub.
 
-> **Status:** Planning complete. No application code yet; the foundation (F1–F15) is next.
+> **Status:** Foundation built: database, sign-in, app shell with every screen as a "Coming soon" page, tests. Stories are next.
 > **Demo only:** No real payments, no real emails, fictional data.
 
 ## Tech Stack
@@ -70,12 +70,85 @@ potato-chip-store/
 
 Empty folders contain a `.gitkeep` file so Git keeps them.
 
-## Getting Started
+## Getting Started (Windows)
 
-Full setup steps are added in foundation item F15. In short:
+Type these in **PowerShell**. Lines starting with `#` are notes, not commands.
 
-1. Install Python 3.11+, Git, Node.js, the GitHub CLI, Docker and the Supabase CLI.
-2. Clone the repo, then create a virtual environment: `python -m venv .venv`.
-3. Install the packages: `pip install -r requirements.txt`.
-4. Copy `.env.example` to `.env` and `.streamlit/secrets.toml.example` to `.streamlit/secrets.toml`, then fill in your Supabase values.
-5. Run the app: `streamlit run app/streamlit_app.py`.
+### 0. Install once
+- **Python 3.11 or newer** from [python.org](https://www.python.org/downloads/). On the first installer screen, tick **"Add python.exe to PATH"**.
+- **Git** from [git-scm.com](https://git-scm.com/download/win).
+- **VS Code** and the **Claude Code** extension (for the class).
+
+Check they work (each prints a version):
+```powershell
+py --version
+git --version
+```
+
+### 1. Clone the repo
+```powershell
+cd $HOME\Documents
+git clone https://github.com/zandertran10/potato-chip-store.git
+cd potato-chip-store
+```
+
+### 2. Create and turn on a virtual environment
+A virtual environment keeps this project's packages separate from everything else.
+```powershell
+py -m venv .venv
+.\.venv\Scripts\Activate.ps1
+```
+Your prompt now starts with `(.venv)`. Do step 2's second line every time you open a new terminal.
+
+If PowerShell says *"running scripts is disabled on this system"*, run this once, then try again:
+```powershell
+Set-ExecutionPolicy -Scope CurrentUser RemoteSigned
+```
+
+### 3. Install the packages
+```powershell
+python -m pip install --upgrade pip
+pip install -r requirements.txt
+```
+
+### 4. Add the Supabase keys (`.env`)
+```powershell
+copy .env.example .env
+code .env
+```
+Fill in the two values the Tech Lead sends you privately, then save:
+```
+SUPABASE_URL=https://<your-project>.supabase.co
+SUPABASE_ANON_KEY=<the anon / publishable key>
+```
+- Use the **anon** (public) key only. The app refuses a `service_role` key.
+- `.env` is gitignored. **Never commit it, paste it into chat, or screenshot it.**
+
+### 5. Run the app
+```powershell
+streamlit run app/streamlit_app.py
+```
+Your browser opens at http://localhost:8501. Stop the app with **Ctrl+C**.
+You can click around as a guest without keys. To sign in, use a demo account from the Tech Lead (setup: [docs/deployment/demo-accounts.md](docs/deployment/demo-accounts.md)).
+
+### 6. Run the checks
+The same checks run on every pull request (CI):
+```powershell
+ruff check . --extend-exclude .claude
+python -m pytest tests/unit -q
+```
+Both should pass before you open a pull request. Unit tests use a fake Supabase (`tests/conftest.py`), so they need no keys and no internet.
+
+### Troubleshooting
+
+| You see | Fix |
+|---|---|
+| "The store isn't set up yet: SUPABASE_URL ... is missing" | Step 4: `.env` is missing or empty |
+| `ModuleNotFoundError: No module named 'streamlit'` | The venv isn't on: `.\.venv\Scripts\Activate.ps1` |
+| `'streamlit' is not recognized` | Same: turn on the venv, or use `python -m streamlit run app/streamlit_app.py` |
+| "Email or password is wrong." with a demo account | Check the password with the Tech Lead; the accounts are made in [demo-accounts.md](docs/deployment/demo-accounts.md) |
+| Port 8501 is busy | `streamlit run app/streamlit_app.py --server.port 8502` |
+
+## Database (Tech Lead)
+
+The database lives in Supabase. To set up a new project, apply `supabase/migrations/` in number order, then follow [docs/deployment/demo-accounts.md](docs/deployment/demo-accounts.md) for the sample data and demo accounts. `supabase/tests/place_order_test.sql` checks the order function.
