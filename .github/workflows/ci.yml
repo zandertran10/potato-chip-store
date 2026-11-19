@@ -1,0 +1,39 @@
+name: CI
+
+# Lint and unit tests on every pull request (NFR-MNT-06), and on main after a merge.
+on:
+  pull_request:
+  push:
+    branches: [main]
+
+permissions:
+  contents: read
+
+jobs:
+  lint-and-test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+          cache: pip
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+          pip install "ruff>=0.17,<0.18" "pytest>=8,<9"
+
+      # .claude/ holds the installed third-party skills. They are not our code
+      # and would fail the lint with style warnings we don't own.
+      - name: Lint
+        run: ruff check . --extend-exclude .claude
+
+      # Only unit tests: integration tests need a Supabase project and keys,
+      # which CI does not have (keys never go in workflow files, NFR-SEC-11).
+      # Exit code 5 means "no tests found". That is fine until the first tests
+      # are added, so it does not fail the build.
+      - name: Unit tests
+        run: python -m pytest tests/unit -q || [ $? -eq 5 ]
