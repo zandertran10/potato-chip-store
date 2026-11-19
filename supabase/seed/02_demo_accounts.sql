@@ -3,16 +3,28 @@
 -- dashboard (docs/deployment/demo-accounts.md). No passwords are stored here.
 -- Safe to run more than once.
 
+-- If the users were created BEFORE the migrations ran, the "new user ->
+-- profile" trigger didn't exist yet and they have no profile. Make them now.
+insert into public.profiles (id, display_name, email, role)
+select u.id, split_part(lower(u.email), '@', 1), lower(u.email), 'customer'
+from auth.users u
+where lower(u.email) in ('owner@demo.test', 'staff@demo.test', 'customer@demo.test')
+on conflict (id) do nothing;
+
 do $$
 declare
-  v_owner_id    uuid := (select id from public.profiles where email = 'owner@demo.test');
-  v_staff_id    uuid := (select id from public.profiles where email = 'staff@demo.test');
-  v_customer_id uuid := (select id from public.profiles where email = 'customer@demo.test');
+  v_owner_id    uuid := (select id from public.profiles where lower(email) = 'owner@demo.test');
+  v_staff_id    uuid := (select id from public.profiles where lower(email) = 'staff@demo.test');
+  v_customer_id uuid := (select id from public.profiles where lower(email) = 'customer@demo.test');
   v_cart_id     uuid;
+  v_missing     text := concat_ws(', ',
+                          case when v_owner_id is null then 'owner@demo.test' end,
+                          case when v_staff_id is null then 'staff@demo.test' end,
+                          case when v_customer_id is null then 'customer@demo.test' end);
 begin
-  if v_owner_id is null or v_staff_id is null or v_customer_id is null then
-    raise exception 'Create owner@demo.test, staff@demo.test and customer@demo.test first. '
-                    'See docs/deployment/demo-accounts.md.';
+  if v_missing <> '' then
+    raise exception 'These demo users don''t exist yet: %. Create them in Authentication > Users '
+                    '(see docs/deployment/demo-accounts.md), then run this again.', v_missing;
   end if;
 
   -- Roles and friendly names. New sign-ups are always "customer", so the owner
