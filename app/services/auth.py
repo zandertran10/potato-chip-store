@@ -18,6 +18,7 @@ from postgrest.exceptions import APIError
 from supabase_auth.errors import AuthApiError, AuthError
 
 from app.services.supabase_client import forget_client, get_client
+from app.utils.session import on_sign_in
 
 logger = logging.getLogger(__name__)
 
@@ -94,6 +95,7 @@ def sign_in(email: str, password: str) -> CurrentUser:
 
     st.session_state[_USER_KEY] = user
     logger.info("Sign-in succeeded")
+    on_sign_in()
     return user
 
 
@@ -141,7 +143,17 @@ def register(display_name: str, email: str, password: str) -> CurrentUser | None
     user = _load_profile(response.user.id, email)
     st.session_state[_USER_KEY] = user
     logger.info("Register succeeded")
+    on_sign_in()
     return user
+
+
+def reset_password(email: str) -> None:
+    """Start Supabase's password reset email. Always looks successful (NFR-AUTH-08).
+
+    The page shows the same message whether or not the email exists, so nobody
+    can use it to find out who has an account. Story: US-503 (U3-07).
+    """
+    raise NotImplementedError("US-503: reset_password")
 
 
 def sign_out() -> None:

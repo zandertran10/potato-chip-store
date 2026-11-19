@@ -1,0 +1,61 @@
+"""The header on every screen: store name, search, cart count, account (doc 02 section 5).
+
+Owned by User 3 (U3-01 polishes it). The shell calls render_header(); stories
+never need to edit app/streamlit_app.py to change what's in here.
+"""
+
+from __future__ import annotations
+
+import streamlit as st
+
+from app.services import auth, cart
+from app.services.auth import CurrentUser
+from app.utils import pages
+
+
+def _cart_label() -> str:
+    """'Cart (3)', or just 'Cart' until the cart service is built (US-302)."""
+    try:
+        count = cart.count_bags()
+    except NotImplementedError:
+        return "Cart"
+    return f"Cart ({count})"
+
+
+def _remember_search() -> None:
+    """Callback: keep the search word and clear the box.
+
+    A widget's value can only be changed in its own callback, not after it's drawn,
+    so the clearing happens here and the page switch happens in render_header().
+    """
+    st.session_state.header_search_go = st.session_state.header_search.strip()
+    st.session_state.header_search = ""
+
+
+def render_header(user: CurrentUser | None) -> None:
+    """Store name, a search box, the cart link with its count, and sign in / account."""
+    with st.container(horizontal=True, vertical_alignment="center", gap="medium"):
+        st.page_link(pages.HOME, label="**Potato Chip Co.**", icon=":material/bakery_dining:")
+
+        st.text_input(
+            "Search chips and flavors",
+            placeholder="Search chips and flavors",
+            label_visibility="collapsed",
+            key="header_search",
+            on_change=_remember_search,
+            width=280,
+        )
+        query = st.session_state.pop("header_search_go", "")
+        if query:
+            # Hand the search word to the shop page (US-103 reads ?q=).
+            st.switch_page(pages.SHOP, query_params={"q": query})
+
+        st.page_link(pages.CART, label=_cart_label(), icon=":material/shopping_cart:")
+
+        if user is None:
+            st.page_link(pages.SIGN_IN, label="Sign in", icon=":material/login:")
+        else:
+            st.page_link(pages.MY_ACCOUNT, label=user.display_name, icon=":material/account_circle:")
+            if st.button("Sign out", icon=":material/logout:", key="header_sign_out"):
+                auth.sign_out()
+                st.switch_page(pages.HOME)

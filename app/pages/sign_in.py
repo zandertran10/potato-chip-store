@@ -3,6 +3,7 @@
 import streamlit as st
 
 from app.services import auth
+from app.utils import pages
 
 st.title("Sign in")
 st.caption("Save your bags and track your orders.")
@@ -30,4 +31,5 @@ if submitted:
     else:
         st.rerun()
 
-st.caption("New here? Registering opens soon. Forgot your password? Reset opens soon.")
+st.page_link(pages.RESET_PASSWORD, label="Forgot password?", icon=":material/lock_reset:")
+st.page_link(pages.REGISTER, label="New here? Create an account", icon=":material/person_add:")
