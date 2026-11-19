@@ -6,15 +6,17 @@ import streamlit as st
 
 from app.components.badges import stock_badge
 from app.models.catalog import BaseChip
+from app.services.catalog import image_url
 from app.utils import pages
 
 
 def product_card(chip: BaseChip, *, low_stock_threshold: int = 10) -> None:
-    """Image, name, "from $X.XX", stock badge and a "Build this bag" link."""
+    """Image, name, "from $X.XX", stock badge and a "Build this bag" link (US-102 AC1)."""
     with st.container(border=True):
-        if chip.image_path:
-            # The storage path becomes a public URL in U1-01; alt text is required (doc 02 s8).
-            st.image(chip.image_path, alt=chip.image_alt or chip.name)
+        image = image_url(chip.image_path)  # storage path -> public URL
+        if image:
+            # Alt text is required for every product image (doc 02 section 8).
+            st.image(image, alt=chip.image_alt or chip.name, width="stretch")
         else:
             st.markdown("### :material/bakery_dining:")
         st.subheader(chip.name)
