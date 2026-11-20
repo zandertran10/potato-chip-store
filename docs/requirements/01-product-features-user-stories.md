@@ -183,10 +183,11 @@ As a **customer**, I want to sign in and out so that my account stays private.
 - AC3: After signing in I go back to the page I came from.
 - AC4: The header shows my name and a "Sign out" button. Signing out clears my session and goes to Home.
 
-### US-503 Reset password · Should
-As a **customer**, I want to reset a forgotten password so that I can get back in.
-- AC1: A "Forgot password?" link asks for my email and starts the Supabase reset.
-- AC2: The same message is shown whether or not the email exists.
+### US-503 Forgot password · Should
+As a **customer**, I want to know what to do if I forget my password so that I can get back in.
+- AC1: A "Forgot password?" link opens a page that says to ask the trainer, who resets the account; then I register again.
+- AC2: No email is sent and no email address is asked for, so the page reveals nothing about who has an account.
+- *Changed 2026-11-19 (was: a Supabase reset email). The store never sends real emails, and many learners are minors. See docs/architecture/decisions.md, D1.*
 
 ### US-504 My orders · Must
 As a **customer**, I want to see my past orders so that I can check what I bought.

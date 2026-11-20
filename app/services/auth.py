@@ -151,24 +151,6 @@ def register(display_name: str, email: str, password: str) -> CurrentUser | None
     return user
 
 
-def reset_password(email: str) -> None:
-    """Start Supabase's password reset email. Always looks successful (NFR-AUTH-08).
-
-    The page shows the same message whether or not the email exists, so nobody
-    can use it to find out who has an account. Story: US-503 (U3-07).
-    """
-    email = email.strip().lower()
-    if "@" not in email:
-        return  # nothing to send; the page still shows the same message
-    try:
-        get_client().auth.reset_password_for_email(email)
-    except (AuthError, httpx.HTTPError) as error:
-        # Never tell the visitor; that would reveal whether the email exists.
-        logger.warning("Password reset request failed: %s", type(error).__name__)
-        return
-    logger.info("Password reset requested")  # no email in the log (NFR-LOG-03)
-
-
 def sign_out() -> None:
     """Sign out and clear everything this browser session was holding (US-502 AC4)."""
     try:

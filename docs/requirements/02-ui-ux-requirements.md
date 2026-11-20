@@ -86,7 +86,7 @@ Header: Logo | Search | Shop | Account or Sign in | Cart (count)
 │       └── S3  Product detail + Build Your Bag
 ├── S4  Cart
 ├── S5  Checkout ──► S6 Order confirmation
-├── S7  Sign in ── S9 Reset password
+├── S7  Sign in ── S9 Forgot password
 ├── S8  Register
 ├── S10 My account (orders, profile, flavor passport)
 └── Store Admin (staff and owner only)
@@ -183,9 +183,10 @@ For every screen, the designer provides **default, loading, empty and error** st
 - A password-rules checklist that ticks off as the shopper types
 - Errors shown next to the field they belong to
 
-### S9 Reset password · US-503
-- Email field and a "Send reset link" button
-- The same success message whether or not the email exists
+### S9 Forgot password · US-503
+- "Ask your trainer" message: the trainer resets the account and you register again
+- No email field and no email is sent (decisions.md, D1)
+- Links back to Sign in and Register
 
 ### S10 My account · US-504, US-505, US-603
 - Tabs: Orders, Profile, Flavor passport

@@ -76,7 +76,7 @@ Status: **works** = built and covered by unit tests in `tests/unit/`.
 | `current_user` | `() -> CurrentUser \| None` | all pages | works |
 | `require_role` | `(*allowed_roles: str) -> CurrentUser` | every protected page | works |
 | `password_problems` | `(password: str) -> list[str]` | US-501 (U3-02) | works |
-| `reset_password` | `(email: str) -> None` | US-503 (U3-07) | works |
+| ~~`reset_password`~~ | removed 2026-11-19 | US-503 (U3-07): the page says "ask your trainer", no email (decisions.md, D1) | removed |
 
 ## Helpers in `app/utils/`
 

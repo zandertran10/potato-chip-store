@@ -20,7 +20,7 @@ This is a classroom demo, so the targets are small. The security practices are r
 | NFR-AUTH-05 | Sessions use Supabase's token lifetime (1 hour, renewed while active). When a session expires, the user is asked to sign in again and their cart is kept. | Should |
 | NFR-AUTH-06 | Supabase's built-in sign-in rate limits stay on, to slow down password guessing. | Must |
 | NFR-AUTH-07 | Email confirmation at sign-up is **off** for local and class demos and **on** in production. Locally, test emails can be read in Supabase's built-in mail viewer (Inbucket). | Should |
-| NFR-AUTH-08 | The password reset uses Supabase's reset flow and shows the same message whether or not the email exists. | Should |
+| NFR-AUTH-08 | No password-reset email is sent. A forgotten password is handled by the trainer, and the page asks for no email, so it can't reveal who has an account (decisions.md, D1; changed 2026-11-19). | Should |
 
 ## 2. Security
 

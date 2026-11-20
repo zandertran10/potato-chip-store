@@ -67,7 +67,7 @@ menu = {
     "Account": [
         _page(pages.SIGN_IN, "Sign in", ":material/login:", "Sign in to check out and see your orders.", show=not signed_in),
         _page(pages.REGISTER, "Register", ":material/person_add:", "Create an account to save your bags.", show=not signed_in),
-        _page(pages.RESET_PASSWORD, "Reset password", ":material/lock_reset:", "Get a password reset email.", show=False),
+        _page(pages.RESET_PASSWORD, "Forgot password", ":material/lock_reset:", "What to do if you forgot your password.", show=False),
         _page(pages.MY_ACCOUNT, "My account", ":material/account_circle:", "Your orders, profile and flavor passport.", show=signed_in),
     ],
 }

@@ -1,9 +1,14 @@
 """Account stories: US-501 register, US-502 sign in (return to ?next=), US-503 reset password."""
 
+from pathlib import Path
+
 import pytest
+from streamlit.testing.v1 import AppTest
 
 from app.services import auth
 from app.utils import pages
+
+ENTRY_POINT = str(Path(__file__).resolve().parents[2] / "app" / "streamlit_app.py")
 
 # US-501 Register ---------------------------------------------------------------------------
 
@@ -47,24 +52,31 @@ def test_password_checklist_rules():
     assert auth.password_problems("Crunchy123") == []
 
 
-# US-503 Reset password --------------------------------------------------------------------
+# US-503 Forgot password: "Ask your trainer", no email (decisions.md D1) -------------------
 
-def test_reset_password_asks_supabase_to_send_the_email(fake_supabase):
-    auth.reset_password("  Customer@Demo.test ")
+def _open_forgot_password_page():
+    at = AppTest.from_file(ENTRY_POINT, default_timeout=30)
+    at.switch_page("pages/reset_password.py").run()
+    return at
 
-    assert fake_supabase.reset_emails == ["customer@demo.test"]
+
+def test_forgot_password_page_says_ask_your_trainer(fake_supabase):
+    at = _open_forgot_password_page()
+
+    assert not at.exception
+    assert "Ask your trainer" in at.info[0].value  # AC1
 
 
-def test_reset_password_never_complains(fake_supabase):
-    # Unknown emails, junk and network trouble all look the same to the visitor (AC2).
-    auth.reset_password("nobody@demo.test")
-    auth.reset_password("junk")
+def test_forgot_password_sends_no_email_and_asks_for_none(fake_supabase):
+    at = _open_forgot_password_page()
 
-    def broken(email, options=None):
-        raise auth.AuthError("network", None)
+    assert len(at.text_input) == 0  # no email box: the page reveals nothing about who has an account (AC2)
+    assert fake_supabase.reset_emails == []  # and nothing was asked of Supabase
 
-    fake_supabase.auth.reset_password_for_email = broken
-    auth.reset_password("customer@demo.test")  # no exception
+
+def test_no_reset_email_function_is_left_in_the_app():
+    # Nothing in the app can send a reset email by mistake.
+    assert not hasattr(auth, "reset_password")
 
 
 # US-502 Return to the page you came from ---------------------------------------------------

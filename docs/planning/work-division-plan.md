@@ -360,7 +360,7 @@ What to build:
 - **U3-04:** the same pattern, plus family, profile sliders, allergens, add-on price, and a staff picks tab.
 - **U3-05:** an editable table (`st.data_editor`); low-stock rows highlighted with an icon; a reason is required; calls `set_stock`; a history tab.
 - **U3-06:** `require_role("owner")`; find a user by email; change their role with a confirmation step; the owner's own row is locked. Integration test: staff can't change roles, even directly in the database.
-- **U3-07:** the "Forgot password?" page; the same message whatever the email; the README says where to find the local reset email.
+- **U3-07:** the "Forgot password?" page says to ask the trainer; no email is sent (decisions.md, D1).
 - **U3-08:** a display name and default address form, which checkout uses to fill in the address.
 
 ---
