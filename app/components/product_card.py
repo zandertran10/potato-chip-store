@@ -4,7 +4,7 @@ from __future__ import annotations
 
 import streamlit as st
 
-from app.components.badges import stock_badge
+from app.components.badges import new_badge, stock_badge
 from app.models.catalog import BaseChip
 from app.services.catalog import image_url
 from app.utils import pages
@@ -21,7 +21,11 @@ def product_card(chip: BaseChip, *, low_stock_threshold: int = 10) -> None:
             st.markdown("### :material/bakery_dining:")
         st.subheader(chip.name)
         st.markdown(f"from **${chip.price:.2f}**")
-        stock_badge(chip.stock, low_stock_threshold=low_stock_threshold)
+        # "New" or "Few left" badges (doc 02 S2), both based on real data, never invented.
+        with st.container(horizontal=True, gap="small"):
+            stock_badge(chip.stock, low_stock_threshold=low_stock_threshold)
+            if chip.is_new():
+                new_badge()
         st.page_link(
             pages.PRODUCT,
             label="Build this bag",

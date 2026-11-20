@@ -5,7 +5,7 @@ from decimal import Decimal
 import streamlit as st
 
 from app.components.states import empty_state
-from app.services import cart
+from app.services import cart, catalog
 from app.utils import pages
 
 
@@ -33,6 +33,7 @@ try:
     lines = cart.get_cart()
 except cart.CartError as error:
     st.error(str(error), icon=":material/cloud_off:")
+    st.button("Try again", icon=":material/refresh:", key="cart_retry")  # NFR-REL-02
     st.stop()
 
 if not lines:
@@ -44,7 +45,14 @@ if not lines:
 for line in lines:
     limit = cart.max_quantity(line.base_chip, line.flavors)
     with st.container(border=True):
-        info, quantity_column, total_column = st.columns([3, 1, 1], vertical_alignment="center")
+        picture, info, quantity_column, total_column = st.columns([0.6, 3, 1, 1], vertical_alignment="center")
+        with picture:
+            # A small image of the chip (doc 02 S4), or its icon when there's no photo yet.
+            image = catalog.image_url(line.base_chip.image_path)
+            if image:
+                st.image(image, alt=line.base_chip.image_alt or line.base_chip.name, width=64)
+            else:
+                st.markdown("## :material/bakery_dining:")
         with info:
             st.markdown(f"**{line.base_chip.name}**")
             st.markdown(" ".join(f":gray-badge[{flavor.name}]" for flavor in line.flavors))

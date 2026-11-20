@@ -38,13 +38,15 @@ def render_header(user: CurrentUser | None, *, current_page: str = "") -> None:
 
     `current_page` is the open page's address ("shop", "" for Home), from st.navigation.
     """
-    with st.container(horizontal=True, vertical_alignment="center", gap="medium"):
+    # "bottom" keeps the links in line with the search box now that it has a label above it.
+    with st.container(horizontal=True, vertical_alignment="bottom", gap="medium"):
         st.page_link(pages.HOME, label="**Potato Chip Co.**", icon=":material/bakery_dining:")
 
+        # A visible label, not just placeholder text (doc 02 section 8).
         st.text_input(
-            "Search chips and flavors",
-            placeholder="Search chips and flavors",
-            label_visibility="collapsed",
+            "Search",
+            placeholder="Chips and flavors",
+            label_visibility="visible",
             key="header_search",
             on_change=_remember_search,
             width=280,

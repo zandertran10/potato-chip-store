@@ -53,12 +53,17 @@ def access_denied(message: str = "This page is for store staff.") -> None:
     st.page_link(pages.SIGN_IN, label="Sign in", icon=":material/login:")
 
 
-def offline() -> None:
-    """Database unreachable (NFR-REL-01)."""
+def offline(*, key: str = "offline_retry") -> None:
+    """Database unreachable (NFR-REL-01), with a "Try again" button (NFR-REL-02, doc 02 S16).
+
+    Pressing the button simply runs the page again. Pass a different `key` if a
+    page could show this twice at once.
+    """
     st.warning(
         "The store is taking a snack break. Please try again in a minute.",
         icon=":material/cloud_off:",
     )
+    st.button("Try again", icon=":material/refresh:", key=key)
 
 
 def demo_footer() -> None:

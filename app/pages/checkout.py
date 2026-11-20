@@ -2,6 +2,7 @@
 
 import logging
 import os
+import time
 import uuid
 from decimal import Decimal
 from pathlib import Path
@@ -55,29 +56,56 @@ try:
 except profile.ProfileError:
     saved_address = ""
 
+_PLACING = "checkout_placing"
+_ERROR = "checkout_error"
+
+
+def _start_placing() -> None:
+    """Callback, runs the moment "Place order" is pressed: lock the button (doc 02 S5).
+
+    The time is stored, not just True, so the lock can never get stuck: after
+    60 seconds it counts as unlocked even if something unexpected went wrong.
+    """
+    st.session_state[_PLACING] = time.time()
+
+
+def _stop_with(message: str, code: str | None = None) -> None:
+    """Unlock the button and show what went wrong on the next run."""
+    st.session_state.pop(_PLACING, None)
+    st.session_state[_ERROR] = (message, code)
+    st.rerun()
+
+
+placing = time.time() - st.session_state.get(_PLACING, 0) < 60
+
 # US-401 AC3: delivery name and address, both required.
 with st.form("checkout_form"):
     name = st.text_input("Delivery name", value=user.display_name, max_chars=100)
     address = st.text_area("Delivery address", value=saved_address, max_chars=300)
-    submitted = st.form_submit_button("Place order", type="primary", icon=":material/shopping_bag:",
-                                      disabled=bool(too_many), width="stretch")
+    # While an order is being placed the button is greyed out and says so.
+    st.form_submit_button("Placing your order..." if placing else "Place order", type="primary",
+                          icon=":material/shopping_bag:", disabled=bool(too_many) or placing,
+                          on_click=_start_placing, width="stretch")
 
-if submitted:
+if _ERROR in st.session_state:
+    message, code = st.session_state.pop(_ERROR)
+    # US-402 AC2: nothing was created; say what changed.
+    st.error(message, icon=":material/error:")
+    if code == "OUT_OF_STOCK":
+        st.page_link(pages.CART, label="Update my cart", icon=":material/shopping_cart:")
+
+if placing:
     if not name.strip() or not address.strip():
-        st.error("Please enter a delivery name and address.", icon=":material/error:")
-        st.stop()
-    # The same key is reused if this attempt is pressed twice, so only one order is made.
+        _stop_with("Please enter a delivery name and address.")
+    # The same key is reused if this attempt is sent twice, so only one order is made.
     key = st.session_state.setdefault(_KEY, str(uuid.uuid4()))
     try:
         with st.spinner("Placing your order..."):
             placed = orders.place_order(name, address, key)
     except orders.OrderError as error:
-        # US-402 AC2: nothing was created; say what changed.
-        st.error(str(error), icon=":material/error:")
-        if error.code == "OUT_OF_STOCK":
-            st.page_link(pages.CART, label="Update my cart", icon=":material/shopping_cart:")
-        st.stop()
+        _stop_with(str(error), error.code)
 
+    st.session_state.pop(_PLACING, None)
     st.session_state.pop(_KEY, None)  # the next checkout gets a fresh key
 
     # US-404: save the confirmation email AFTER the order exists. If that fails,

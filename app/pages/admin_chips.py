@@ -31,9 +31,11 @@ except catalog.CatalogUnavailable:
 search = st.text_input("Search chips", placeholder="Name or style")
 shown = [c for c in chips if search.lower() in c.name.lower() or search.lower() in c.style.lower()]
 st.dataframe(
-    [{"Name": c.name, "Style": c.style, "Price": f"${c.price:.2f}", "Stock": c.stock,
-      "Shown in shop": c.is_active, "Featured": c.is_featured} for c in shown],
-    hide_index=True, alt="Table of base chips with price, stock and whether they are shown in the shop",
+    [{"Photo": catalog.image_url(c.image_path), "Name": c.name, "Style": c.style, "Price": f"${c.price:.2f}",
+      "Stock": c.stock, "Shown in shop": c.is_active, "Featured": c.is_featured} for c in shown],
+    # A small picture of each chip (doc 02 S11); empty when it has no photo yet.
+    column_config={"Photo": st.column_config.ImageColumn("Photo", width="small")},
+    hide_index=True, alt="Table of base chips with photo, price, stock and whether they are shown in the shop",
 )
 
 by_id = {c.id: c for c in chips}

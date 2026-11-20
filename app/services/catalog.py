@@ -10,6 +10,7 @@ from __future__ import annotations
 import logging
 import random
 import uuid
+from datetime import datetime
 from decimal import Decimal
 from typing import Any
 
@@ -31,7 +32,7 @@ logger = logging.getLogger(__name__)
 IMAGE_BUCKET = "product-images"
 _BASE_CHIP_COLUMNS = (
     "id, name, description, style, thickness, crunch_level, allergens, price, stock, "
-    "image_path, image_alt, is_featured, is_active"
+    "image_path, image_alt, is_featured, is_active, created_at"
 )
 
 
@@ -91,6 +92,7 @@ def _base_chip_from_row(row: dict[str, Any]) -> BaseChip:
         image_alt=row.get("image_alt"),
         is_featured=bool(row.get("is_featured")),
         is_active=bool(row.get("is_active", True)),
+        created_at=datetime.fromisoformat(row["created_at"]) if row.get("created_at") else None,
     )
 
 
@@ -115,7 +117,7 @@ def _flavor_from_row(row: dict[str, Any]) -> Flavor:
 
 def _chip_rows(*, include_inactive: bool = False) -> list[dict[str, Any]]:
     """Chip rows, newest first."""
-    query = get_client().table("base_chips").select(_BASE_CHIP_COLUMNS + ", created_at")
+    query = get_client().table("base_chips").select(_BASE_CHIP_COLUMNS)
     if not include_inactive:
         query = query.eq("is_active", True)
     return _run(query.order("created_at", desc=True)).data or []

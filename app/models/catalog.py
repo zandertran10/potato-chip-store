@@ -7,7 +7,11 @@ pages and components never handle raw database rows.
 from __future__ import annotations
 
 from dataclasses import dataclass, field
+from datetime import UTC, datetime, timedelta
 from decimal import Decimal
+
+# A chip counts as "New" for this many days after it's added.
+NEW_FOR_DAYS = 14
 
 # The five flavor families (doc 01 section 4).
 FLAVOR_FAMILIES = ("Salty", "Tangy", "Spicy", "Sweet", "Herby")
@@ -37,6 +41,14 @@ class BaseChip:
     image_alt: str | None = None
     is_featured: bool = False
     is_active: bool = True
+    created_at: datetime | None = None  # when it was added; drives the "New" badge
+
+    def is_new(self, *, now: datetime | None = None, days: int = NEW_FOR_DAYS) -> bool:
+        """Added in the last `days` days (doc 02 S2 "New" badge). Honest: based on the real date."""
+        if self.created_at is None:
+            return False
+        now = now or datetime.now(UTC)
+        return now - self.created_at <= timedelta(days=days)
 
 
 @dataclass(frozen=True)

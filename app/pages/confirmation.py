@@ -21,9 +21,11 @@ if order is None:
     not_found("order")
     st.stop()
 
-# One short celebration, only right after placing it (doc 02 section 4).
+# One short celebration, only right after placing it (doc 02 section 4). A still
+# banner instead of moving balloons: Streamlit can't see the device's "reduce
+# motion" setting, and doc 02 says all motion must respect it.
 if st.session_state.pop("just_ordered", None) == order.id:
-    st.balloons()
+    st.success("Hooray! Your bag is on its way to the packing table.", icon=":material/celebration:")
 
 st.title("Order confirmed")
 st.markdown(f"## {order.order_number}")
