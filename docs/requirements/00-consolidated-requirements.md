@@ -116,7 +116,7 @@ Decide these as a class. If nobody decides, the default answer applies.
 
 | # | Question | Default answer |
 |---|----------|----------------|
-| Q1 | What is the store called? | **Chip Lab** |
+| Q1 | What is the store called? | **Chip Lab**. *Decided: **Potato Chip Co.** (all answers: docs/architecture/decisions.md)* |
 | Q2 | Maximum flavors per bag? | **3** (a store setting, so it can change later) |
 | Q3 | Email confirmation at sign-up? | **Off** for local and class demos, **on** in production |
 | Q4 | Where is the app hosted? | **Streamlit Community Cloud** (ADR 0001) |

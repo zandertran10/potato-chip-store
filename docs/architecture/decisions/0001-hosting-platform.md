@@ -1,7 +1,7 @@
 # 0001: Hosting Platform
 
-- **Status:** Proposed (open)
-- **Date:**
+- **Status:** Accepted: Streamlit Community Cloud
+- **Date:** 2026-11-19 (recorded in [../decisions.md](../decisions.md), Q4)
 
 ## Context
 The planned stack is Streamlit + Supabase, hosted on Vercel.

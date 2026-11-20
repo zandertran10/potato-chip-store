@@ -320,7 +320,7 @@ The seed script loads this data so the store looks full from the first run. All 
 
 **Other seed data**
 - Staff picks: Kettle Cooked + Salt & Vinegar + Sea Salt; Wavy Ridge + Smoky BBQ + Cheddar Blast; Sweet Potato + Cinnamon Sugar.
-- Accounts: `owner@demo.test`, `staff@demo.test`, `customer@demo.test`. Passwords are given in the README for local use only.
+- Accounts: `owner@demo.test`, `staff@demo.test`, `customer@demo.test`. Passwords are chosen in the Supabase dashboard and shared privately, never written in the repo (decisions.md, D5; docs/deployment/demo-accounts.md).
 - The demo customer has **2 bags in their cart** and **2 past orders**, so the cart, checkout and order pages can be tested right away.
 - Settings: maximum 3 flavors per bag, low-stock threshold 10.
 
