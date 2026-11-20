@@ -38,3 +38,8 @@ This file records the answers to the open questions in [doc 00 §8](../requireme
 
 ### D6. Page files stay in `app/pages/` (2026-11-19)
 **Decision.** Keep `app/pages/`, as in the work plan, `CLAUDE.md` and the playbook template. The overseer's reference app uses `app/views/` (Streamlit's advice, to avoid its older page auto-discovery); here `st.navigation` already overrides that, and moving 20 files would change nothing users see.
+
+### D7. Audit log of who changed what (2026-11-19)
+**Decision.** A new `audit_log` table (migration 13), filled **only by database triggers**, records: chips, flavors and staff picks added, edited, hidden or removed; orders placed and every status change (packed, shipped, cancelled); role changes; store settings changes. Only the owner can read it (Store Admin → Dashboard → Activity). Nobody can add, edit or delete entries from the app.
+**Why.** NFR-LOG-02 asks for these events to be logged; before, only stock changes were kept (`stock_history`), and the app's console log disappears on restart. Triggers also catch changes made in the Supabase dashboard (shown as "Supabase dashboard").
+**Privacy.** No emails, addresses or display-name edits are copied into the log (NFR-LOG-03). Stock changes stay in `stock_history` to avoid one entry per bag sold.

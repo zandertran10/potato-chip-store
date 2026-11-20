@@ -18,7 +18,7 @@ from decimal import Decimal
 import httpx
 from postgrest.exceptions import APIError
 
-from app.models.admin import DashboardStats, StockChange, UserSummary
+from app.models.admin import AuditEntry, DashboardStats, StockChange, UserSummary
 from app.models.catalog import FLAVOR_FAMILIES, BaseChip, Flavor, StoreSettings
 from app.services import catalog
 from app.services.supabase_client import get_client
@@ -316,3 +316,36 @@ def dashboard_stats(*, now: datetime | None = None) -> DashboardStats:
         low_stock_items=low,
         top_flavors=top.most_common(5),
     )
+
+
+# --- Audit log (migration 13) ---------------------------------------------------------
+
+class AuditLogMissing(AdminError):
+    """The audit_log table isn't in the database yet (migration 13 not applied)."""
+
+
+def audit_entries(*, limit: int = 200) -> list[AuditEntry]:
+    """The newest audit log entries (owner only; RLS returns nothing to anyone else)."""
+    try:
+        rows = get_client().table("audit_log").select("*").order("created_at", desc=True).limit(limit).execute().data
+    except APIError as error:
+        # 42P01 = no such table; PGRST205 = the API can't find the table.
+        if error.code in ("42P01", "PGRST205"):
+            raise AuditLogMissing("The activity log isn't set up yet.") from None
+        logger.error("Audit log query failed (database error %s)", error.code)
+        raise AdminError("We couldn't load the activity log. Please try again.") from None
+    except httpx.HTTPError as error:
+        logger.error("Audit log query failed: %s", type(error).__name__)
+        raise AdminError("We couldn't reach the store. Please try again in a minute.") from None
+    return [
+        AuditEntry(
+            created_at=datetime.fromisoformat(row["created_at"]),
+            actor_name=row.get("actor_name") or "Unknown",
+            actor_role=row.get("actor_role"),
+            action=row["action"],
+            table_name=row["table_name"],
+            summary=row["summary"],
+            changes=row.get("changes") or {},
+        )
+        for row in rows or []
+    ]

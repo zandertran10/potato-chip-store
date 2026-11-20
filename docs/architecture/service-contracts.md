@@ -132,3 +132,10 @@ Additions only; no existing signature changed.
 | `bag_builder` | adds `all_chips=None` | Switch the base chip (S3 step 1) | US-301 |
 
 **US-401 (review the order)** has no function of its own: it uses `auth.require_role`, `cart.get_cart` and `profile.get_default_address`.
+
+## Audit log (2026-11-19, migration 13)
+
+| Function | Signature | Story | Status |
+|---|---|---|---|
+| `admin.audit_entries` | `(*, limit=200) -> list[AuditEntry]` | NFR-LOG-02, owner's Dashboard → Activity | works |
+| `admin.AuditLogMissing` | exception | Shown as "isn't set up yet" until migration 13 runs | works |

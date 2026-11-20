@@ -37,3 +37,16 @@ class DashboardStats:
     bags_this_week: int
     low_stock_items: int
     top_flavors: list[tuple[str, int]] = field(default_factory=list)  # (name, bags sold)
+
+
+@dataclass(frozen=True)
+class AuditEntry:
+    """One line of the owner's activity log (migration 13)."""
+
+    created_at: datetime
+    actor_name: str
+    actor_role: str | None
+    action: str  # insert, update or delete
+    table_name: str
+    summary: str  # e.g. Hid flavor "Truffle Herb"
+    changes: dict = field(default_factory=dict)  # {"column": {"from": ..., "to": ...}}
