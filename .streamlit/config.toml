@@ -1,10 +1,16 @@
 [theme]
 base = "light"
-primaryColor = "#E0A526"
+# Toasted Gold: dark enough for Streamlit's white button text (5.1:1) and for
+# links and selected states on cream (5.0:1), as WCAG AA asks (doc 02 s3.2, s8).
+# The brighter Golden Chip #E0A526 only reached 2.2:1. See decisions.md, D8.
+primaryColor = "#9A6200"
+linkColor = "#9A6200"
 backgroundColor = "#FFFDF7"
 secondaryBackgroundColor = "#FFF3D6"
 textColor = "#3B2A1A"
 font = "sans serif"
+# Rounded, friendly headings (doc 02 s3.3); body text stays the clean default.
+headingFont = "Nunito:https://fonts.googleapis.com/css2?family=Nunito:wght@600;700;800&display=swap"
 
 [server]
 headless = true

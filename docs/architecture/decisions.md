@@ -43,3 +43,8 @@ This file records the answers to the open questions in [doc 00 §8](../requireme
 **Decision.** A new `audit_log` table (migration 13), filled **only by database triggers**, records: chips, flavors and staff picks added, edited, hidden or removed; orders placed and every status change (packed, shipped, cancelled); role changes; store settings changes. Only the owner can read it (Store Admin → Dashboard → Activity). Nobody can add, edit or delete entries from the app.
 **Why.** NFR-LOG-02 asks for these events to be logged; before, only stock changes were kept (`stock_history`), and the app's console log disappears on restart. Triggers also catch changes made in the Supabase dashboard (shown as "Supabase dashboard").
 **Privacy.** No emails, addresses or display-name edits are copied into the log (NFR-LOG-03). Stock changes stay in `stock_history` to avoid one entry per bag sold.
+
+### D8. Darker gold and Nunito headings, for accessibility (2026-11-19)
+**Decision.** The primary color (buttons, links, selected states) is **Toasted Gold `#9A6200`** instead of Golden Chip `#E0A526`. Headings use **Nunito**; body text stays the default sans serif.
+**Why.** Streamlit always puts white text on primary buttons and has no setting to change it. White on `#E0A526` is 2.2:1, and gold links on cream are 2.2:1; WCAG AA (doc 02 §8) needs 4.5:1. `#9A6200` gives 5.1:1 for button text and 5.0:1 as text on cream. Nunito is one of the two fonts doc 02 §3.3 names.
+**Changed.** `.streamlit/config.toml` (`primaryColor`, `linkColor`, `headingFont`) and the token table in doc 02 §3.2.

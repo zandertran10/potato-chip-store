@@ -35,7 +35,7 @@ These match `.streamlit/config.toml`. If the designer changes them, the config f
 
 | Token | Hex | Use |
 |-------|-----|-----|
-| `primary` (Golden Chip) | `#E0A526` | Main buttons, highlights, selected states |
+| `primary` (Toasted Gold) | `#9A6200` | Main buttons, links, highlights, selected states. *Changed 2026-11-19 from Golden Chip `#E0A526`, which reached only 2.2:1 contrast with Streamlit's white button text; Toasted Gold reaches 5.1:1 (decisions.md, D8).* |
 | `background` (Cream) | `#FFFDF7` | Page background |
 | `surface` (Butter) | `#FFF3D6` | Cards, sidebar, panels |
 | `text` (Toasted Brown) | `#3B2A1A` | Body text and headings |
