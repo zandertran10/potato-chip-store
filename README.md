@@ -119,9 +119,10 @@ code .env
 Fill in the two values the Tech Lead sends you privately, then save:
 ```
 SUPABASE_URL=https://<your-project>.supabase.co
-SUPABASE_ANON_KEY=<the anon / publishable key>
+SUPABASE_PUBLISHABLE_KEY=<the sb_publishable_... key>
 ```
-- Use the **anon** (public) key only. The app refuses a `service_role` key.
+- Use the **publishable** key only (Supabase → your project → Connect, or Project Settings → API Keys). The app refuses a **secret** key (`sb_secret_...`, formerly `service_role`).
+- An older `.env` that says `SUPABASE_ANON_KEY=` still works.
 - `.env` is gitignored. **Never commit it, paste it into chat, or screenshot it.**
 
 ### 5. Run the app

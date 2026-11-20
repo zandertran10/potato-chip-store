@@ -25,7 +25,7 @@ def get_client() -> Client:
     if _CLIENT_KEY not in st.session_state:
         settings = get_settings()
         st.session_state[_CLIENT_KEY] = create_client(
-            settings.supabase_url, settings.supabase_anon_key
+            settings.supabase_url, settings.supabase_publishable_key
         )
     return st.session_state[_CLIENT_KEY]
 
