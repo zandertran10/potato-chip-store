@@ -21,6 +21,7 @@ This file records the answers to the open questions in [doc 00 §8](../requireme
 **Decision.** The "Forgot password?" page tells the user to ask their trainer, who resets the account in the Supabase dashboard; the user then registers again. No reset email is sent and the page asks for no email address.
 **Why.** Doc 00 §7 lists "sending real emails" as out of scope, learners use made-up `@demo.test` addresses, and many are minors. The overseer's reference app made the same choice.
 **Changed.** US-503 and NFR-AUTH-08 were updated to match; `auth.reset_password` was removed.
+**Update 2026-11-19.** The page now speaks like a real store: *"Contact our customer support team and we'll reset your account for you."* In class, the support team is the trainer. Same behaviour: no email box, nothing is sent.
 
 ### D2. Admin pages exist only for staff and the owner (2026-11-18)
 **Decision.** Guests and customers don't get the Store Admin pages at all: not in the menu, and an admin address opens Home. Staff get Base chips, Flavors, Stock and Orders; the owner also gets Staff, Settings and Dashboard.

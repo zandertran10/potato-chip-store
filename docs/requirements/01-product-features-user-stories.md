@@ -185,7 +185,7 @@ As a **customer**, I want to sign in and out so that my account stays private.
 
 ### US-503 Forgot password · Should
 As a **customer**, I want to know what to do if I forget my password so that I can get back in.
-- AC1: A "Forgot password?" link opens a page that says to ask the trainer, who resets the account; then I register again.
+- AC1: A "Forgot password?" link opens a page that says to contact customer support, who reset the account (in class: the trainer); then I register again with the same email.
 - AC2: No email is sent and no email address is asked for, so the page reveals nothing about who has an account.
 - *Changed 2026-11-19 (was: a Supabase reset email). The store never sends real emails, and many learners are minors. See docs/architecture/decisions.md, D1.*
 

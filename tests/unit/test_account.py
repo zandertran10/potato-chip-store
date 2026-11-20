@@ -52,7 +52,7 @@ def test_password_checklist_rules():
     assert auth.password_problems("Crunchy123") == []
 
 
-# US-503 Forgot password: "Ask your trainer", no email (decisions.md D1) -------------------
+# US-503 Forgot password: contact support, no email (decisions.md D1) -------------------
 
 def _open_forgot_password_page():
     at = AppTest.from_file(ENTRY_POINT, default_timeout=30)
@@ -60,11 +60,13 @@ def _open_forgot_password_page():
     return at
 
 
-def test_forgot_password_page_says_ask_your_trainer(fake_supabase):
+def test_forgot_password_page_says_contact_support(fake_supabase):
     at = _open_forgot_password_page()
 
     assert not at.exception
-    assert "Ask your trainer" in at.info[0].value  # AC1
+    message = at.info[0].value
+    assert "Contact our customer support team" in message  # AC1
+    assert "same email address" in message  # what to do after the reset
 
 
 def test_forgot_password_sends_no_email_and_asks_for_none(fake_supabase):

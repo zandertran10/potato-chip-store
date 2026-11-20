@@ -184,7 +184,7 @@ For every screen, the designer provides **default, loading, empty and error** st
 - Errors shown next to the field they belong to
 
 ### S9 Forgot password · US-503
-- "Ask your trainer" message: the trainer resets the account and you register again
+- "Contact our customer support team" message, in a friendly store tone: support resets the account (in class: the trainer) and you register again with the same email
 - No email field and no email is sent (decisions.md, D1)
 - Links back to Sign in and Register
 
