@@ -33,8 +33,11 @@ def _remember_search() -> None:
     st.session_state.header_search = ""
 
 
-def render_header(user: CurrentUser | None) -> None:
-    """Store name, a search box, the cart link with its count, and sign in / account."""
+def render_header(user: CurrentUser | None, *, current_page: str = "") -> None:
+    """Store name, a search box, the cart link with its count, and sign in / account.
+
+    `current_page` is the open page's address ("shop", "" for Home), from st.navigation.
+    """
     with st.container(horizontal=True, vertical_alignment="center", gap="medium"):
         st.page_link(pages.HOME, label="**Potato Chip Co.**", icon=":material/bakery_dining:")
 
@@ -48,8 +51,15 @@ def render_header(user: CurrentUser | None) -> None:
         )
         query = st.session_state.pop("header_search_go", "")
         if query:
-            # Hand the search word to the shop page (US-103 reads ?q=).
-            st.switch_page(pages.SHOP, query_params={"q": query})
+            # Put the word into the Shop page's search box (key "q"). That box is
+            # tied to ?q= in the address, so Streamlit refuses to set ?q= directly
+            # once it exists; setting the box updates the address by itself.
+            st.session_state["q"] = query
+            if current_page == "shop":
+                # Already on Shop: switching to it again would try to clear ?q=,
+                # which the box also blocks. Just show the new results.
+                st.rerun()
+            st.switch_page(pages.SHOP)
 
         st.page_link(pages.CART, label=_cart_label(), icon=":material/shopping_cart:")
 

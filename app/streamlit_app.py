@@ -91,7 +91,7 @@ if admin_pages:
     menu["Store Admin"] = admin_pages
 
 current_page = st.navigation(menu, position="top")
-render_header(user)
+render_header(user, current_page=current_page.url_path)
 
 # Reserve the page's space first, draw the footer, THEN run the page inside the
 # reserved space. Pages can stop early (auth.require_role calls st.stop()), which
